@@ -1,0 +1,31 @@
+name: driving_aid_deaf
+description: "A new Flutter project for Driving Aid for Deaf."
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Library untuk fitur aplikasi
+  vibration: ^2.0.1
+  audioplayers: ^5.2.1
+  cupertino_icons: ^1.0.6
+  # Library untuk Database & Auth
+  supabase_flutter: ^2.12.4
+  flutter_dotenv: ^6.0.0
+  image_picker: ^1.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Pastikan logo sudah ada di folder assets
+  assets:
+    - assets/logodrivingaid.png
+    - .env
