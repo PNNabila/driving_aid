@@ -25,15 +25,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
       try {
+        // .maybeSingle() tidak akan crash jika data tidak ditemukan (mengembalikan null)
         final data = await Supabase.instance.client
             .from('user_profiles')
             .select()
             .eq('user_id', user.id)
-            .single();
-        setState(() {
-          userData = data;
-          userData!['email'] = user.email;
-        });
+            .maybeSingle();
+
+        if (data != null) {
+          setState(() {
+            userData = data;
+            userData!['email'] = user.email;
+          });
+        }
       } catch (e) {
         debugPrint("Error fetching profile: $e");
       }
@@ -164,8 +168,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildLabel("HIGH", 2)
               ],
             ),
-            const SizedBox(
-                height: 20), // Memberi ruang di bawah setelah tombol dihapus
           ],
         ),
       ),

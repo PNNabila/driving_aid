@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,8 +15,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _fullNameController = TextEditingController();
   final _usernameController = TextEditingController();
   bool _isLoading = false;
-  File? _imageFile;
+
+  // Gunakan Uint8List untuk Web/Mobile yang kompatibel
+  Uint8List? _imageBytes;
   String? _currentAvatarUrl;
+
+  // Nama Bucket (PASTIKAN SAMA PERSIS DENGAN DASHBOARD)
+  final String bucketName = 'avatars';
 
   @override
   void initState() {
@@ -30,40 +35,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final picker = ImagePicker();
     final pickedFile =
         await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-
     if (pickedFile != null) {
-      setState(() => _imageFile = File(pickedFile.path));
+      final bytes = await pickedFile.readAsBytes();
+      setState(() => _imageBytes = bytes);
     }
   }
 
   Future<void> _saveProfile() async {
     setState(() => _isLoading = true);
-    final user = Supabase.instance.client.auth.currentUser;
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+
     if (user == null) return;
 
     try {
       String? newAvatarUrl = _currentAvatarUrl;
 
-      // Jika ada gambar baru yang dipilih, upload ke Supabase Storage
-      if (_imageFile != null) {
-        final fileExt = _imageFile!.path.split('.').last;
-        // Nama file unik per user
-        final fileName = '${user.id}/avatar.$fileExt';
+      if (_imageBytes != null) {
+        final fileName = '${user.id}/avatar.png';
 
-        // 1. Upload ke bucket 'AVATARS' (Harus huruf besar semua sesuai dashboard)
-        // upsert: true artinya replace file lama jika sudah ada
-        await Supabase.instance.client.storage.from('AVATARS').upload(
-            fileName, _imageFile!,
-            fileOptions: const FileOptions(upsert: true));
+        // PROSES UPLOAD
+        await supabase.storage.from(bucketName).uploadBinary(
+              fileName,
+              _imageBytes!,
+              fileOptions: const FileOptions(upsert: true),
+            );
 
-        // 2. Dapatkan URL publik
-        newAvatarUrl = Supabase.instance.client.storage
-            .from('AVATARS')
-            .getPublicUrl(fileName);
+        newAvatarUrl = supabase.storage.from(bucketName).getPublicUrl(fileName);
       }
 
-      // 3. Update data di tabel user_profiles
-      await Supabase.instance.client.from('user_profiles').update({
+      // UPDATE DATABASE
+      await supabase.from('user_profiles').update({
         'full_name': _fullNameController.text.trim(),
         'username': _usernameController.text.trim(),
         if (newAvatarUrl != null) 'avatar_url': newAvatarUrl,
@@ -73,13 +75,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("Profil berhasil diperbarui"),
             backgroundColor: Colors.green));
-        Navigator.pop(context, true); // Kembali ke setting dan refresh data
+        Navigator.pop(context, true);
       }
     } catch (e) {
-      debugPrint("Error save profile: $e");
+      debugPrint("ERROR DETAIL: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("Gagal memperbarui profil: $e"),
+            content: Text("Gagal: ${e.toString()}"),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -102,12 +104,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   CircleAvatar(
                     radius: 60,
                     backgroundColor: Colors.grey[300],
-                    backgroundImage: _imageFile != null
-                        ? FileImage(_imageFile!)
-                        : (_currentAvatarUrl != null
+                    backgroundImage: _imageBytes != null
+                        ? MemoryImage(_imageBytes!)
+                        : (_currentAvatarUrl != null &&
+                                _currentAvatarUrl!.isNotEmpty
                             ? NetworkImage(_currentAvatarUrl!)
                             : null) as ImageProvider?,
-                    child: (_imageFile == null && _currentAvatarUrl == null)
+                    child: (_imageBytes == null &&
+                            (_currentAvatarUrl == null ||
+                                _currentAvatarUrl!.isEmpty))
                         ? const Icon(Icons.person,
                             size: 60, color: Colors.white)
                         : null,

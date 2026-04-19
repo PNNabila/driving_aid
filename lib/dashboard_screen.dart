@@ -8,6 +8,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  // --- STATUS INDEPENDEN ---
   bool isOn = true;
   bool isConnected = true;
   int batteryLevel = 75;
@@ -28,10 +29,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       try {
         final data = await Supabase.instance.client
             .from('user_profiles')
-            .select('full_name, avatar_url')
+            .select('full_name, username, avatar_url')
             .eq('user_id', user.id)
-            .single();
-        if (mounted) {
+            .maybeSingle(); // Menggunakan maybeSingle agar tidak crash
+        if (mounted && data != null) {
           setState(() {
             userData = data;
             isLoading = false;
@@ -44,10 +45,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  // --- SWITCH SEKARANG MENGARUH KE CONNECTED STATUS ---
   Future<void> _toggleSwitch(bool value) async {
     final String action = value ? "Menghidupkan" : "Mematikan";
-
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -70,7 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (confirm == true) {
       setState(() {
         isOn = value;
-        isConnected = value; // Terhubung kembali ke ON/OFF
+        isConnected = value;
       });
     }
   }
@@ -92,7 +91,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // --- HEADER KOTAK SOLID ---
+          // --- HEADER BIRU ---
           Container(
             padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
             width: double.infinity,
@@ -116,10 +115,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     const Text("Halo,",
                         style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    // BAGIAN INI YANG DIUBAH: Mengambil full_name atau username
                     Text(
                       isLoading
                           ? "Memuat..."
-                          : (userData?['full_name'] ?? "User"),
+                          : (userData?['full_name'] ??
+                              userData?['username'] ??
+                              "User"),
                       style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -136,6 +138,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
+                  // BATERAI & KONEKSI
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -144,9 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             color: Colors.green.shade700, size: 35),
                         Text(" $batteryLevel%",
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: mutedGrey)),
+                                fontWeight: FontWeight.bold, fontSize: 16)),
                       ]),
                       Text(isConnected ? "CONNECTED" : "DISCONNECTED",
                           style: TextStyle(
@@ -159,7 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   const Divider(height: 40, thickness: 1),
 
-                  // ALERT BESAR (Merah hanya jika ada activeWarning)
+                  // ALERT
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -173,7 +174,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   const SizedBox(height: 50),
 
-                  // SWITCH LONJONG (Pill-shaped)
+                  // SWITCH
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 35, vertical: 12),
