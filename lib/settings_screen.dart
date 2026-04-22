@@ -83,7 +83,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       radius: 40,
                       backgroundColor: const Color(0xFF2C4A73),
                       backgroundImage: userData!['avatar_url'] != null
-                          ? NetworkImage(userData!['avatar_url'])
+                          // --- PERUBAHAN DI SINI: Menambahkan cap waktu (timestamp) ---
+                          ? NetworkImage(
+                              "${userData!['avatar_url']}?t=${DateTime.now().millisecondsSinceEpoch}")
                           : null,
                       child: userData!['avatar_url'] == null
                           ? const Icon(Icons.person,

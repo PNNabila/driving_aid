@@ -64,12 +64,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         newAvatarUrl = supabase.storage.from(bucketName).getPublicUrl(fileName);
       }
 
-      // UPDATE DATABASE
-      await supabase.from('user_profiles').update({
+      // UPDATE DATABASE (Mencegah Error 409 Conflict)
+      final Map<String, dynamic> updateData = {
         'full_name': _fullNameController.text.trim(),
-        'username': _usernameController.text.trim(),
         if (newAvatarUrl != null) 'avatar_url': newAvatarUrl,
-      }).eq('user_id', user.id);
+      };
+
+      if (_usernameController.text.trim() != widget.userData['username']) {
+        updateData['username'] = _usernameController.text.trim();
+      }
+
+      await supabase
+          .from('user_profiles')
+          .update(updateData)
+          .eq('user_id', user.id);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -108,7 +116,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ? MemoryImage(_imageBytes!)
                         : (_currentAvatarUrl != null &&
                                 _currentAvatarUrl!.isNotEmpty
-                            ? NetworkImage(_currentAvatarUrl!)
+                            // --- PENAMBAHAN CAP WAKTU DI SINI ---
+                            ? NetworkImage(
+                                "$_currentAvatarUrl?t=${DateTime.now().millisecondsSinceEpoch}")
                             : null) as ImageProvider?,
                     child: (_imageBytes == null &&
                             (_currentAvatarUrl == null ||

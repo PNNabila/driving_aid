@@ -12,7 +12,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool isOn = true;
   bool isConnected = true;
   int batteryLevel = 75;
-  String activeWarning = "TENGAH";
+  // Ini kunci utamanya: harus persis sama dengan kata yang dikirim di _buildAlertBox
+  String activeWarning = "CENTER";
 
   Map<String, dynamic>? userData;
   bool isLoading = true;
@@ -46,21 +47,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _toggleSwitch(bool value) async {
-    final String action = value ? "Menghidupkan" : "Mematikan";
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Konfirmasi"),
-        content: Text("Apakah Anda yakin ingin $action sistem?"),
+        content: const Text("Apakah Anda yakin ingin mengkoneksikan alat?"),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
               child: const Text("Batal")),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2C4A73)),
+              backgroundColor: Colors.green.shade700,
+              foregroundColor: Colors.white, // Teks putih agar solid
+            ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("Ya"),
+            child: const Text(
+              "Ya",
+              style: TextStyle(fontWeight: FontWeight.bold), // Bold
+            ),
           ),
         ],
       ),
@@ -93,7 +98,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           // --- HEADER BIRU ---
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
             width: double.infinity,
             color: deepNavy,
             child: Row(
@@ -101,10 +106,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 CircleAvatar(
                   radius: 25,
                   backgroundColor: Colors.white,
-                  backgroundImage:
-                      (userData != null && userData!['avatar_url'] != null)
-                          ? NetworkImage(userData!['avatar_url'])
-                          : null,
+                  backgroundImage: (userData != null &&
+                          userData!['avatar_url'] != null)
+                      // --- PERUBAHAN DI SINI: Menambahkan cap waktu (timestamp) ---
+                      ? NetworkImage(
+                          "${userData!['avatar_url']}?t=${DateTime.now().millisecondsSinceEpoch}")
+                      : null,
                   child: (userData == null || userData!['avatar_url'] == null)
                       ? const Icon(Icons.person, size: 30, color: deepNavy)
                       : null,
@@ -115,7 +122,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     const Text("Halo,",
                         style: TextStyle(color: Colors.white70, fontSize: 12)),
-                    // BAGIAN INI YANG DIUBAH: Mengambil full_name atau username
                     Text(
                       isLoading
                           ? "Memuat..."
@@ -164,20 +170,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildAlertBox("KIRI", Icons.arrow_back_ios, "KIRI",
-                          mutedRed, mutedGrey),
-                      _buildAlertBox("TENGAH", Icons.warning, "TENGAH",
-                          mutedRed, mutedGrey),
-                      _buildAlertBox("KANAN", Icons.arrow_forward_ios, "KANAN",
-                          mutedRed, mutedGrey),
+                      _buildAlertBox(
+                          "LEFT", Icons.arrow_back_ios, "LEFT", "HORN"),
+                      _buildAlertBox(
+                          "CENTER", Icons.warning, "CENTER", "SIREN"),
+                      _buildAlertBox(
+                          "RIGHT", Icons.arrow_forward_ios, "RIGHT", "HORN"),
                     ],
                   ),
                   const SizedBox(height: 50),
 
                   // SWITCH
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 35, vertical: 12),
+                    margin: const EdgeInsets.only(top: 150),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
                     decoration: BoxDecoration(
                         color: deepNavy,
                         borderRadius: BorderRadius.circular(50)),
@@ -188,10 +195,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 22)),
-                        const SizedBox(width: 20),
+                                fontSize: 18)),
+                        const SizedBox(width: 15),
                         Transform.scale(
-                          scale: 1.3,
+                          scale: 1.1,
                           child: Switch(
                             value: isOn,
                             onChanged: _toggleSwitch,
@@ -211,13 +218,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildAlertBox(String title, IconData icon, String direction,
-      Color activeColor, Color inactiveColor) {
+  Widget _buildAlertBox(
+      String title, IconData icon, String direction, String type) {
     bool isActive = (activeWarning == direction);
+    // Logika warna berdasarkan tipe (Horn = Amber, Siren = Red)
+    Color activeColor = (type == "SIREN") ? Colors.red : Colors.amber.shade700;
+    Color inactiveColor = Colors.grey.shade400;
+
     return Container(
-      width: 110,
-      height: 140,
-      padding: const EdgeInsets.all(15),
+      width: 150,
+      height: 250,
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: isActive ? activeColor.withOpacity(0.05) : Colors.white,
         borderRadius: BorderRadius.circular(15),
@@ -229,13 +240,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 50, color: isActive ? activeColor : inactiveColor),
+          Icon(icon, size: 40, color: isActive ? activeColor : inactiveColor),
           const SizedBox(height: 10),
           Text(title,
               style: TextStyle(
                   color: isActive ? activeColor : inactiveColor,
                   fontSize: 14,
                   fontWeight: FontWeight.bold)),
+          const SizedBox(height: 5),
+          // Kotak keterangan tipe
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: isActive ? activeColor : inactiveColor,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Text(type,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold)),
+          )
         ],
       ),
     );
