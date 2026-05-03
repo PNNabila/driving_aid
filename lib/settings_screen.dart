@@ -14,6 +14,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Map<String, dynamic>? userData;
   bool isLoadingProfile = true;
 
+  // --- BAGIAN YANG DITAMBAH 1: Membuat variabel timestamp statis ---
+  int _imageTimestamp = DateTime.now().millisecondsSinceEpoch;
+
   @override
   void initState() {
     super.initState();
@@ -83,9 +86,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       radius: 40,
                       backgroundColor: const Color(0xFF2C4A73),
                       backgroundImage: userData!['avatar_url'] != null
-                          // --- PERUBAHAN DI SINI: Menambahkan cap waktu (timestamp) ---
+                          // --- BAGIAN YANG DIUBAH 2: Memanggil variabel _imageTimestamp ---
                           ? NetworkImage(
-                              "${userData!['avatar_url']}?t=${DateTime.now().millisecondsSinceEpoch}")
+                              "${userData!['avatar_url']}?t=$_imageTimestamp")
                           : null,
                       child: userData!['avatar_url'] == null
                           ? const Icon(Icons.person,
@@ -118,6 +121,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             );
                             if (result == true) {
+                              // --- BAGIAN YANG DITAMBAH 3: Update timestamp HANYA jika profil diedit ---
+                              setState(() {
+                                _imageTimestamp =
+                                    DateTime.now().millisecondsSinceEpoch;
+                              });
                               _fetchUserData();
                             }
                           },

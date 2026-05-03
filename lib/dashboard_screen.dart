@@ -50,12 +50,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Konfirmasi"),
-        content: const Text("Apakah Anda yakin ingin mengkoneksikan alat?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure you want to connect this device?"),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("Batal")),
+              child: const Text("No")),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green.shade700,
@@ -63,7 +63,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text(
-              "Ya",
+              "Yes",
               style: TextStyle(fontWeight: FontWeight.bold), // Bold
             ),
           ),
@@ -168,14 +168,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   // ALERT
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildAlertBox(
-                          "LEFT", Icons.arrow_back_ios, "LEFT", "HORN"),
-                      _buildAlertBox(
-                          "CENTER", Icons.warning, "CENTER", "SIREN"),
-                      _buildAlertBox(
-                          "RIGHT", Icons.arrow_forward_ios, "RIGHT", "HORN"),
+                      Expanded(
+                        child: _buildAlertBox(
+                            "LEFT", Icons.arrow_back_ios, "LEFT", "HORN"),
+                      ),
+                      const SizedBox(width: 10), // Jarak antar kotak
+                      Expanded(
+                        child: _buildAlertBox(
+                            "CENTER", Icons.warning, "CENTER", "SIREN"),
+                      ),
+                      const SizedBox(width: 10), // Jarak antar kotak
+                      Expanded(
+                        child: _buildAlertBox(
+                            "RIGHT", Icons.arrow_forward_ios, "RIGHT", "HORN"),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 50),
@@ -226,8 +234,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Color inactiveColor = Colors.grey.shade400;
 
     return Container(
-      width: 150,
-      height: 250,
+      width: 110,
+      height: 180,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: isActive ? activeColor.withOpacity(0.05) : Colors.white,

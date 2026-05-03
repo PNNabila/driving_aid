@@ -11,29 +11,40 @@ class _HistoryScreenState extends State<HistoryScreen> {
   final List<Map<String, dynamic>> logs = [
     {
       "type": "SIREN",
+      "direction": "CENTER",
       "time": "17.30, 10/12/2025",
       "duration": "1.49 s",
       "isSiren": true
     },
     {
       "type": "HORN",
+      "direction": "LEFT",
       "time": "17.38, 10/12/2025",
       "duration": "0.50 s",
       "isSiren": false
     },
     {
       "type": "HORN",
+      "direction": "RIGHT",
       "time": "17.50, 10/12/2025",
       "duration": "1.00 s",
       "isSiren": false
     },
     {
       "type": "SIREN",
+      "direction": "CENTER",
       "time": "18.00, 10/12/2025",
       "duration": "2.00 s",
       "isSiren": true
     },
   ];
+
+  // --- FUNGSI BARU: Otomatis memunculkan logo berdasarkan arah ---
+  IconData _getDirectionIcon(String direction) {
+    if (direction == "LEFT") return Icons.arrow_back;
+    if (direction == "RIGHT") return Icons.arrow_forward;
+    return Icons.adjust; // Icon bulat target untuk CENTER
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +95,42 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         Text(log['time'], style: const TextStyle(fontSize: 12)),
                       ],
                     ),
+
+                    // --- PERUBAHAN DI SINI: Lambang Siren/Horn + Lambang Arah ---
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Row(
+                        children: [
+                          // 1. Logo Tipe (Siren merah / Horn kuning)
+                          Icon(
+                            log['isSiren'] ? Icons.warning : Icons.campaign,
+                            size: 16,
+                            color: log['isSiren']
+                                ? Colors.red
+                                : Colors.amber.shade700,
+                          ),
+                          const SizedBox(width: 8),
+
+                          // 2. Logo Arah (Kiri / Kanan / Tengah)
+                          Icon(
+                            _getDirectionIcon(log['direction']),
+                            size: 16,
+                            color: Colors.grey[700],
+                          ),
+                          const SizedBox(width: 4),
+
+                          // 3. Teks Arah
+                          Text(
+                            log['direction'],
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                                color: Colors.grey[800]),
+                          ),
+                        ],
+                      ),
+                    ),
+
                     trailing: IntrinsicWidth(
                         child: Row(children: [
                       const VerticalDivider(

@@ -15,8 +15,8 @@ class _MainNavigationState extends State<MainNavigation> {
   // PERHATIKAN: Saya sudah membuang semua kata 'const' di sini!
   final List<Widget> _screens = [
     DashboardScreen(),
-    SettingsScreen(),
-    HistoryScreen()
+    HistoryScreen(), // <-- History pindah ke tengah
+    SettingsScreen() // <-- Settings pindah ke paling kanan
   ];
 
   @override
@@ -29,9 +29,11 @@ class _MainNavigationState extends State<MainNavigation> {
         selectedItemColor: const Color(0xFF2C4A73),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Dashboard'),
+          // <-- Icon History pindah ke tengah
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
+          // <-- Icon Settings pindah ke paling kanan
           BottomNavigationBarItem(
               icon: Icon(Icons.settings), label: 'Settings'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
         ],
       ),
     );

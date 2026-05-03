@@ -81,7 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             TextField(
                 controller: _usernameController,
                 decoration: InputDecoration(
-                    labelText: "Username / Nama Lengkap",
+                    labelText: "Username",
                     prefixIcon: const Icon(Icons.person),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15.0),
