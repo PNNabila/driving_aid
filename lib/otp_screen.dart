@@ -57,7 +57,7 @@ class _OtpScreenState extends State<OtpScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Kode OTP baru telah dikirim!"),
+            content: Text("New OTP code has been sent!"),
             backgroundColor: Colors.blue,
           ),
         );
@@ -67,7 +67,7 @@ class _OtpScreenState extends State<OtpScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Gagal mengirim ulang kode OTP"),
+            content: Text("Failed to resend OTP code"),
             backgroundColor: Colors.red,
           ),
         );
@@ -80,7 +80,7 @@ class _OtpScreenState extends State<OtpScreen> {
   Future<void> _verifyOtp() async {
     if (_otpController.text.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Masukkan 6 digit kode OTP")),
+        const SnackBar(content: Text("Enter the 6-digit OTP code")),
       );
       return;
     }
@@ -96,7 +96,7 @@ class _OtpScreenState extends State<OtpScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Email Berhasil Diverifikasi! Silakan Login."),
+            content: Text("Email Verified Successfully! Please Login."),
             backgroundColor: Colors.green,
           ),
         );
@@ -113,7 +113,7 @@ class _OtpScreenState extends State<OtpScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Kode OTP salah atau sudah kadaluarsa"),
+            content: Text("OTP code is incorrect or has expired"),
             backgroundColor: Colors.red,
           ),
         );
@@ -134,14 +134,14 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("VERIFIKASI OTP")),
+      appBar: AppBar(title: const Text("OTP VERIFICATION")),
       body: Padding(
         padding: const EdgeInsets.all(30.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Masukkan kode verifikasi yang dikirim ke:\n${widget.email}",
+              "Enter the verification code sent to:\n${widget.email}",
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16),
             ),
@@ -176,7 +176,7 @@ class _OtpScreenState extends State<OtpScreen> {
                               BorderRadius.circular(15.0), // Tombol melengkung
                         )),
                     onPressed: _verifyOtp,
-                    child: const Text("VERIFIKASI",
+                    child: const Text("VERIFY OTP",
                         style: TextStyle(color: Colors.white)),
                   ),
             const SizedBox(height: 20),
@@ -187,14 +187,14 @@ class _OtpScreenState extends State<OtpScreen> {
               children: [
                 Text(
                   _canResend
-                      ? "Belum menerima kode?"
-                      : "Kirim ulang OTP dalam 00:${_secondsRemaining.toString().padLeft(2, '0')}",
+                      ? "Haven't received the code yet?"
+                      : "Resend OTP in 00:${_secondsRemaining.toString().padLeft(2, '0')}",
                   style: TextStyle(color: Colors.grey[700]),
                 ),
                 if (_canResend) ...[
                   TextButton(
                     onPressed: _isLoading ? null : _resendOtp,
-                    child: const Text("Kirim Ulang",
+                    child: const Text("Resend OTP",
                         style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ]
@@ -204,7 +204,7 @@ class _OtpScreenState extends State<OtpScreen> {
             const SizedBox(height: 10),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Ganti Email atau Kembali",
+              child: const Text("Change Email or Go Back",
                   style: TextStyle(color: Colors.red)),
             ),
           ],
